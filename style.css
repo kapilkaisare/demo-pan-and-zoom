@@ -6,3 +6,61 @@
   color: #2c3e50;
   margin-top: 60px;
 }
+
+.outer-container {
+  height: 600px;
+  width: 800px;
+  border-style: solid;
+  border-width: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.inner-container {
+  height: 600px;
+  width: 800px;
+  border-style: solid;
+  border-width: 1px;
+  position: relative;
+  transition: all 0.05s ease-in-out;
+}
+
+.zoomable {
+  border-style: solid;
+  border-width: 1px;
+  position: absolute;
+}
+
+.not-zoomable {
+  border-style: solid;
+  border-width: 1px;
+  position: absolute;
+}
+
+#first {
+  height: 60px;
+  width: 80px;
+  top:  10px;
+  left:  10px;
+}
+
+#second {
+  height: 60px;
+  width: 80px;
+  top:  10px;
+  right: 10px;
+}
+
+#third {
+  height: 60px;
+  width: 80px;
+  bottom: 10px;
+  left: 10px;
+}
+
+#fourth {
+  height: 60px;
+  width: 80px;
+  bottom:  10px;
+  right: 10px;
+}
