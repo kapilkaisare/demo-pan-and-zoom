@@ -17,6 +17,7 @@
 }
 
 .inner-container {
+  background-color:  #EEEEEE;
   height: 600px;
   width: 800px;
   border-style: solid;

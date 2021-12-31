@@ -3,7 +3,7 @@ import './style.css'
 const main = () => {
   const innerContainer = document.querySelector('.inner-container');
 
-  let scale = 1;
+  let scale = 2;
   let mousedown = false;
   let offsetX = 0;
   let offsetY = 0;
@@ -57,6 +57,8 @@ const main = () => {
   innerContainer.addEventListener('mouseout', mouseupHandler);
   innerContainer.addEventListener('mousemove', mousemoveHandler);
   innerContainer.addEventListener('wheel', wheelHandler);
+
+  updateTransformation();
 };
 
 window.onload = main;
