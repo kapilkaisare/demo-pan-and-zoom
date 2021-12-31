@@ -1,6 +1,7 @@
 import './style.css'
 
 const main = () => {
+  const outerContainer = document.querySelector('.outer-container');
   const innerContainer = document.querySelector('.inner-container');
 
   let scale = 2;
@@ -9,6 +10,34 @@ const main = () => {
   let offsetY = 0;
   let startX = 0;
   let startY = 0;
+
+  const getOuterRect = () => {
+    return outerContainer.getBoundingClientRect();
+  };
+
+  const getInnerRect = () => {
+    return innerContainer.getBoundingClientRect();
+  };
+
+  const determineDirectionX = (newX) => {
+    if (newX > startX ) {
+      return 'right';
+    } else if (newX < startX) {
+      return 'left';
+    } else {
+      return 'nochange';
+    }
+  };
+
+  const determineDirectionY = (newY) => {
+    if (newY > startY ) {
+      return 'down';
+    } else if (newY < startY) {
+      return 'up';
+    } else {
+      return 'nochange';
+    }
+  };
 
   const mousedownHandler = (event) => {
     event.preventDefault();
@@ -28,12 +57,29 @@ const main = () => {
     event.preventDefault();
     if (mousedown) {
       window.requestAnimationFrame(() => {
+        const outerRect = getOuterRect();
+        const innerRect = getInnerRect();
         const newX = event.offsetX;
         const newY = event.offsetY;
-        offsetX = offsetX + (newX - startX);
-        offsetY = offsetY + (newY - startY);
-        startX = newX;
-        startY = newY;
+        const xDir = determineDirectionX(newX);
+        const yDir = determineDirectionY(newY);
+
+        if (
+          (!(outerRect.x < innerRect.x) && xDir === 'right') ||
+          (!((innerRect.x + innerRect.width) < (outerRect.width + outerRect.x)) && xDir === 'left')
+        ) {
+          offsetX = offsetX + (newX - startX);
+          startX = newX;
+        }
+
+        if (
+          (!(outerRect.y < innerRect.y) && yDir === 'down') ||
+          (!((innerRect.y + innerRect.height) < (outerRect.height + outerRect.y)) && yDir === 'up')
+        ) {
+          offsetY = offsetY + (newY - startY);
+          startY = newY;
+        }
+
         updateTransformation();
       });
     }
