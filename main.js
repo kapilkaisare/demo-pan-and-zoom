@@ -34,7 +34,7 @@ const main = () => {
         offsetY = offsetY + (newY - startY);
         startX = newX;
         startY = newY;
-        innerContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        updateTransformation();
       });
     }
   };
@@ -44,8 +44,12 @@ const main = () => {
     const newScale = scale - (event.deltaY * 0.001);
     if (newScale > 0) {
       scale = newScale;
-      innerContainer.style.transform = `scale(${scale})`;
+      updateTransformation();
     }
+  };
+
+  const updateTransformation = () => {
+    innerContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
   }
 
   innerContainer.addEventListener('mousedown', mousedownHandler);
