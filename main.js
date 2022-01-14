@@ -4,6 +4,8 @@ const main = () => {
   const outerContainer = document.querySelector('.outer-container');
   const innerContainer = document.querySelector('.inner-container');
 
+  const MAGNIFICATION_CONSTANT = 0.001;
+
   let scale = 2;
   let mousedown = false;
   let offsetX = 0;
@@ -87,7 +89,7 @@ const main = () => {
 
   const wheelHandler = (event) => {
     event.preventDefault();
-    const newScale = scale - (event.deltaY * 0.001);
+    const newScale = scale - (event.deltaY * MAGNIFICATION_CONSTANT);
     if (newScale > 0) {
       scale = newScale;
       updateTransformation();
