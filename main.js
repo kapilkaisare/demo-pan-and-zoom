@@ -1,10 +1,115 @@
 import './style.css'
 
-const main = () => {
-  const outerContainer = document.querySelector('.outer-container');
-  const innerContainer = document.querySelector('.inner-container');
+const MAGNIFICATION_CONSTANT = 0.001;
 
-  const MAGNIFICATION_CONSTANT = 0.001;
+class Container {
+  constructor(element) {
+    this.e = element;
+  }
+
+  get rect() {
+    return this.e.getBoundingClientRect();
+  }
+}
+
+class OuterContainer extends Container {
+  constructor(element) {
+    super(element);
+  }
+
+}
+
+class InnerContainer extends Container {
+
+  constructor(element) {
+    super(element);
+    this.initialize();
+    this.registerEventListeners();
+    this.update();
+  }
+
+  initialize() {
+    this.scale = 2.0;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.mousedown = false;
+    this.refRect = this.rect;
+    this.containerRect = this.e.parentElement.getBoundingClientRect();
+  }
+
+  registerEventListeners() {
+    this.e.addEventListener('wheel', this.wheelHandler.bind(this));
+    this.e.addEventListener('mousedown', this.mousedownHandler.bind(this))
+    this.e.addEventListener('mouseup', this.mouseupHandler.bind(this));
+    this.e.addEventListener('mouseout', this.mouseoutHandler.bind(this));
+    this.e.addEventListener('mousemove', this.mousemoveHandler.bind(this));
+    this.e.addEventListener('transitionend', this.transitionendHandler.bind(this));
+  }
+
+  transitionendHandler(event) {
+    this.refRect = this.rect;
+  }
+
+  wheelHandler(event) {
+    event.preventDefault();
+    const newScale = this.scale - (event.deltaY * MAGNIFICATION_CONSTANT);
+    if (newScale > 0) {
+      this.scale = newScale;
+      this.update();
+      this.refRect = this.rect;
+    }
+  }
+
+  mousedownHandler(event) {
+    event.preventDefault();
+    this.mousedown = true;
+  }
+
+  mouseupHandler(event) {
+    event.preventDefault();
+    this.mousedown = false;
+  }
+
+  mouseoutHandler(event) {
+    event.preventDefault();
+    this.mousedown = false;
+  }
+
+  mousemoveHandler(event) {
+    event.preventDefault();
+    if (this.mousedown) {
+      let {movementX, movementY} = event;
+      console.log('--------------');
+      console.log(movementX + ' ' + movementY);
+      console.log(this.containerRect.x + ' ' + this.containerRect.y);
+      console.log(this.refRect.x + ' ' + this.refRect.y);
+      this.offsetX += movementX;
+      this.offsetY += movementY;
+      this.update();
+    }
+  }
+
+  update() {
+    this.e.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+  }
+
+}
+
+const main = () => {
+  const outerContainer = new OuterContainer(document.querySelector('.outer-container'));
+  const innerContainer = new InnerContainer(document.querySelector('.inner-container'));
+
+  const VERTICAL_DIR = {
+    UP: 'UP',
+    DOWN: 'DOWN',
+    NOCHANGE: 'NOCHANGE'
+  };
+
+  const HORIZONTAL_DIR = {
+    RIGHT: 'RIGHT',
+    LEFT: 'LEFT',
+    NOCHANGE: 'NOCHANGE'
+  };
 
   let scale = 2;
   let mousedown = false;
@@ -13,31 +118,23 @@ const main = () => {
   let startX = 0;
   let startY = 0;
 
-  const getOuterRect = () => {
-    return outerContainer.getBoundingClientRect();
-  };
-
-  const getInnerRect = () => {
-    return innerContainer.getBoundingClientRect();
-  };
-
-  const determineDirectionX = (newX) => {
+  const determineHDirection = (newX) => {
     if (newX > startX ) {
-      return 'right';
+      return HORIZONTAL_DIR.RIGHT;
     } else if (newX < startX) {
-      return 'left';
+      return HORIZONTAL_DIR.LEFT;
     } else {
-      return 'nochange';
+      return HORIZONTAL_DIR.NOCHANGE;
     }
   };
 
-  const determineDirectionY = (newY) => {
+  const determineVDirection = (newY) => {
     if (newY > startY ) {
-      return 'down';
+      return VERTICAL_DIR.DOWN;
     } else if (newY < startY) {
-      return 'up';
+      return VERTICAL_DIR.UP;
     } else {
-      return 'nochange';
+      return VERTICAL_DIR.UP;
     }
   };
 
@@ -58,32 +155,34 @@ const main = () => {
   const mousemoveHandler = (event) => {
     event.preventDefault();
     if (mousedown) {
-      window.requestAnimationFrame(() => {
-        const outerRect = getOuterRect();
-        const innerRect = getInnerRect();
+        const outerRect = outerContainer.rect;
+        const innerRect = innerContainer.rect;
         const newX = event.offsetX;
         const newY = event.offsetY;
-        const xDir = determineDirectionX(newX);
-        const yDir = determineDirectionY(newY);
+        const xDir = determineHDirection(newX);
+        const yDir = determineVDirection(newY);
 
         if (
-          (!(outerRect.x < innerRect.x) && xDir === 'right') ||
-          (!((innerRect.x + innerRect.width) < (outerRect.width + outerRect.x)) && xDir === 'left')
+          (!(outerRect.x < innerRect.x) && xDir === HORIZONTAL_DIR.RIGHT) ||
+          (!((innerRect.x + innerRect.width) < (outerRect.width + outerRect.x)) && xDir === HORIZONTAL_DIR.LEFT)
         ) {
-          offsetX = offsetX + (newX - startX);
+          let offsetAddendum = newX - startX;
+          if (offsetAddendum > outerRect.x) {
+            offsetAddendum = outerRect.x;
+          }
+          offsetX = offsetX + offsetAddendum;
           startX = newX;
         }
 
         if (
-          (!(outerRect.y < innerRect.y) && yDir === 'down') ||
-          (!((innerRect.y + innerRect.height) < (outerRect.height + outerRect.y)) && yDir === 'up')
+          (!(outerRect.y < innerRect.y) && yDir === VERTICAL_DIR.DOWN) ||
+          (!((innerRect.y + innerRect.height) < (outerRect.height + outerRect.y)) && yDir === VERTICAL_DIR.UP)
         ) {
           offsetY = offsetY + (newY - startY);
           startY = newY;
         }
 
         updateTransformation();
-      });
     }
   };
 
@@ -100,18 +199,28 @@ const main = () => {
     innerContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
   }
 
-  innerContainer.addEventListener('mousedown', mousedownHandler);
-  innerContainer.addEventListener('mouseup', mouseupHandler);
-  innerContainer.addEventListener('mouseout', mouseupHandler);
-  innerContainer.addEventListener('mousemove', mousemoveHandler);
-  innerContainer.addEventListener('wheel', wheelHandler);
+  // innerContainer.addEventListener('mousedown', mousedownHandler);
+  // innerContainer.addEventListener('mouseup', mouseupHandler);
+  // innerContainer.addEventListener('mouseout', mouseupHandler);
+  // innerContainer.addEventListener('mousemove', mousemoveHandler);
+  // outerContainer.addEventListener('wheel', wheelHandler);
 
-  updateTransformation();
+  // updateTransformation();
 };
 
 window.onload = main;
 
 document.querySelector('#app').innerHTML = `
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
   <div class="outer-container">
     <div class="inner-container">
       <div id="first" class="zoomable">
@@ -125,6 +234,15 @@ document.querySelector('#app').innerHTML = `
       </div>
       <div id="fourth" class="not-zoomable">
         <div>Fourth</div>
+      </div>
+      <div id="fifth" class="zoomable">
+        <div>Fifth</div>
+      </div>
+      <div id="sixth" class="zoomable">
+        <div>Sixth</div>
+      </div>
+      <div id="seventh" class="zoomable">
+        <div>Seventh</div>
       </div>
     </div>
   </div>

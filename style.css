@@ -65,3 +65,24 @@
   bottom:  10px;
   right: 10px;
 }
+
+#fifth {
+  height: 60px;
+  width: 80px;
+  top:  80px;
+  left:  100px;
+}
+
+#sixth {
+  height: 60px;
+  width: 80px;
+  top:  150px;
+  right: 190px;
+}
+
+#seventh {
+  height: 60px;
+  width: 80px;
+  bottom: 220px;
+  left: 280px;
+}
